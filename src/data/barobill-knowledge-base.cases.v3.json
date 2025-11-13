@@ -1,0 +1,1899 @@
+{
+  "metadata": {
+    "version": "3.0.0",
+    "generated_at": "2025-11-13T05:22:21.784047",
+    "locale": "ko-KR",
+    "source": [
+      "콜데이터(김남정/백정훈/정회임)",
+      "내부 교육자료",
+      "운영정책"
+    ],
+    "notes": "룰 우선 응답, 20~30% GPT 백필 슬롯 표시"
+  },
+  "synonyms": {
+    "환입": [
+      "반품",
+      "환불",
+      "리턴",
+      "반환"
+    ],
+    "인증서": [
+      "공동인증서",
+      "공인인증서"
+    ],
+    "역발행": [
+      "매입자발행",
+      "매입승인"
+    ],
+    "착오정정": [
+      "기재사항착오정정",
+      "기재오류",
+      "오타수정"
+    ],
+    "이중발급": [
+      "중복발급",
+      "중복계산서"
+    ],
+    "공급가액변동": [
+      "금액변동",
+      "증감",
+      "할인추가",
+      "추가청구"
+    ],
+    "계약해제": [
+      "계약취소",
+      "해제"
+    ],
+    "현금영수증": [
+      "현영",
+      "현금영수"
+    ],
+    "팩스": [
+      "FAX"
+    ],
+    "카카오": [
+      "알림톡",
+      "친구톡"
+    ]
+  },
+  "knowledge_base": [
+    {
+      "id": "TAX_MODIFY_OVERVIEW",
+      "title": "수정세금계산서 6대 사유 요약",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "수정발급 사유",
+        "수정세금계산서 종류",
+        "수정사유 6가지"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유/작성일/건수/금액 요약: ① 착오정정: 작성일 고정, 2장(취소(-)+정정(+)) ② 이중발급: 착오 인식일, 1장(부(-)) ③ 공급가액변동: 변동일, 1장(증감액만 ±) ④ 계약해제: 해제일, 1장(부(-)) ⑤ 환입(반품/환불): 확인일, 1장(부(-), 환입액 자동 '-') ⑥ 내국신용장 사후개설: 개설일, 2장(개설분 부(-)+영세 정(+))",
+          "casual": "핵심 요약! 착오정정(2장), 이중(−1장), 금액변동(±1장), 해제(−1장), 환입(−1장), 내신사후(−1,+1). 작성일 규칙 꼭 지키기!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터 요약"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_MODIFY_BASIC_1",
+      "title": "착오정정 기본 규칙",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "착오정정",
+        "착오정정 규칙",
+        "착오정정 작성일",
+        "착오정정 금액"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "착오정정은 기재사항을 잘못 쓴 경우입니다. 원본 작성일로 고정, 2장(취소/정정) 발급됩니다.",
+          "casual": "원본 작성일은 고정! 2장 자동 생성돼요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_MODIFY_BASIC_2",
+      "title": "이중발급 기본 규칙",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "이중발급",
+        "이중발급 규칙",
+        "이중발급 작성일",
+        "이중발급 금액"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "동일 거래를 중복 발급한 경우입니다. 착오 인식일로 1장 부(-) 발급하세요.",
+          "casual": "중복이면 부(-) 1장, 날짜는 인식일."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_MODIFY_BASIC_3",
+      "title": "공급가액변동 기본 규칙",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "공급가액변동",
+        "공급가액변동 규칙",
+        "공급가액변동 작성일",
+        "공급가액변동 금액"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "할인/추가청구 등 금액 증감 시 증감액만 ±로 1장 발급합니다.",
+          "casual": "증감액만 적어서 ± 1장!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_MODIFY_BASIC_4",
+      "title": "계약해제 기본 규칙",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "계약해제",
+        "계약해제 규칙",
+        "계약해제 작성일",
+        "계약해제 금액"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "거래 자체가 해제된 경우 전액 부(-) 1장, 작성일은 해제일입니다.",
+          "casual": "해제면 전액 −1장, 날짜는 해제일."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_MODIFY_BASIC_5",
+      "title": "환입 기본 규칙",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "환입",
+        "환입 규칙",
+        "환입 작성일",
+        "환입 금액"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "반품/환불로 재화가 환입된 경우입니다. 환입액 입력 시 자동 부(-) 처리됩니다.",
+          "casual": "반품=환입=환불! 금액 넣으면 자동 −"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_MODIFY_BASIC_6",
+      "title": "내국신용장 사후개설 기본 규칙",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "내국신용장 사후개설",
+        "내국신용장 사후개설 규칙",
+        "내국신용장 사후개설 작성일",
+        "내국신용장 사후개설 금액"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "과세로 발급했으나 내신이 사후 개설된 경우, 개설분 부(-) + 영세 정(+) 2장을 순서대로 발급합니다.",
+          "casual": "내신 사후: −1, +1 순서대로."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_01",
+      "title": "[케이스] 6/5 발행 → 7/21 반품(환입) 50000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "6월 5일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(6/5) 선택 → 환입액 50000 입력(자동 부(-)) → 작성일 7/21(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(6/5) → 50000 넣으면 자동 − → 작성일 7/21로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_02",
+      "title": "[케이스] 2/27 발행 → 9/4 반품(환입) 150000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "2월 27일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(2/27) 선택 → 환입액 150000 입력(자동 부(-)) → 작성일 9/4(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(2/27) → 150000 넣으면 자동 − → 작성일 9/4로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_03",
+      "title": "[케이스] 10/2 발행 → 9/7 반품(환입) 50000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "10월 2일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(10/2) 선택 → 환입액 50000 입력(자동 부(-)) → 작성일 9/7(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(10/2) → 50000 넣으면 자동 − → 작성일 9/7로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_04",
+      "title": "[케이스] 2/14 발행 → 7/3 반품(환입) 100000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "2월 14일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(2/14) 선택 → 환입액 100000 입력(자동 부(-)) → 작성일 7/3(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(2/14) → 100000 넣으면 자동 − → 작성일 7/3로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_05",
+      "title": "[케이스] 2/18 발행 → 7/2 반품(환입) 300000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "2월 18일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(2/18) 선택 → 환입액 300000 입력(자동 부(-)) → 작성일 7/2(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(2/18) → 300000 넣으면 자동 − → 작성일 7/2로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_06",
+      "title": "[케이스] 2/8 발행 → 11/21 반품(환입) 300000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "2월 8일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(2/8) 선택 → 환입액 300000 입력(자동 부(-)) → 작성일 11/21(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(2/8) → 300000 넣으면 자동 − → 작성일 11/21로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_07",
+      "title": "[케이스] 1/19 발행 → 10/13 반품(환입) 50000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "1월 19일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(1/19) 선택 → 환입액 50000 입력(자동 부(-)) → 작성일 10/13(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(1/19) → 50000 넣으면 자동 − → 작성일 10/13로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_08",
+      "title": "[케이스] 4/2 발행 → 9/28 반품(환입) 100000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "4월 2일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(4/2) 선택 → 환입액 100000 입력(자동 부(-)) → 작성일 9/28(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(4/2) → 100000 넣으면 자동 − → 작성일 9/28로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_09",
+      "title": "[케이스] 5/14 발행 → 3/18 반품(환입) 50000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "5월 14일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(5/14) 선택 → 환입액 50000 입력(자동 부(-)) → 작성일 3/18(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(5/14) → 50000 넣으면 자동 − → 작성일 3/18로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "CASE_RETURN_10",
+      "title": "[케이스] 10/10 발행 → 9/27 반품(환입) 100000원",
+      "category": "세금계산서",
+      "subcategory": "수정",
+      "priority": "high",
+      "patterns": [
+        "10월 10일 발행 반품",
+        "환입 마이너스 발행",
+        "반품 환불"
+      ],
+      "entities": [
+        "<DATE>",
+        "<AMOUNT>"
+      ],
+      "answer": {
+        "template": {
+          "formal": "사유 ‘재화의 환입’ 선택 → 원본(10/10) 선택 → 환입액 100000 입력(자동 부(-)) → 작성일 9/27(확인일) → 발급/전송 확인.",
+          "casual": "‘환입’ 선택 → 원본(10/10) → 100000 넣으면 자동 − → 작성일 9/27로 발급!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 환입 다빈도 질문"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_01",
+      "title": "[가산세] 지연발급 케이스 1",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "지연발급",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "공급시기 다음 달 10일 이후 발급: 1%",
+          "casual": "다음 달 10일 넘기면 1% 지연발급!"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_02",
+      "title": "[가산세] 미발급 케이스 2",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "미발급",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "확정신고기한까지 미발급: 2%",
+          "casual": "기한 넘겨 미발급이면 2%!"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_03",
+      "title": "[가산세] 지연전송 케이스 3",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "지연전송",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "발급 다음날이 지난 후 ~ 확정신고기한 내 전송: 0.3%",
+          "casual": "전송 늦으면 0.3%"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_04",
+      "title": "[가산세] 미전송 케이스 4",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "미전송",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "확정신고기한 경과 후 미전송: 0.5%",
+          "casual": "기한 넘기면 0.5%"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_05",
+      "title": "[가산세] 수취자불공제 케이스 5",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "수취자불공제",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "전자세금계산서 지연/미발급 시 매입세액 0.5% 불공제 가능",
+          "casual": "수취자 0.5% 불공제될 수 있어요."
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_06",
+      "title": "[가산세] 지연발급 케이스 6",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "지연발급",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "공급시기 다음 달 10일 이후 발급: 1%",
+          "casual": "다음 달 10일 넘기면 1% 지연발급!"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_07",
+      "title": "[가산세] 미발급 케이스 7",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "미발급",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "확정신고기한까지 미발급: 2%",
+          "casual": "기한 넘겨 미발급이면 2%!"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_08",
+      "title": "[가산세] 지연전송 케이스 8",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "지연전송",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "발급 다음날이 지난 후 ~ 확정신고기한 내 전송: 0.3%",
+          "casual": "전송 늦으면 0.3%"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_09",
+      "title": "[가산세] 미전송 케이스 9",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "미전송",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "확정신고기한 경과 후 미전송: 0.5%",
+          "casual": "기한 넘기면 0.5%"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_10",
+      "title": "[가산세] 수취자불공제 케이스 10",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "수취자불공제",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "전자세금계산서 지연/미발급 시 매입세액 0.5% 불공제 가능",
+          "casual": "수취자 0.5% 불공제될 수 있어요."
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_11",
+      "title": "[가산세] 지연발급 케이스 11",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "지연발급",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "공급시기 다음 달 10일 이후 발급: 1%",
+          "casual": "다음 달 10일 넘기면 1% 지연발급!"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "TAX_PENALTY_12",
+      "title": "[가산세] 미발급 케이스 12",
+      "category": "부가가치세",
+      "subcategory": "가산세",
+      "priority": "high",
+      "patterns": [
+        "미발급",
+        "가산세",
+        "신고기한",
+        "발급기한",
+        "전송기한"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "확정신고기한까지 미발급: 2%",
+          "casual": "기한 넘겨 미발급이면 2%!"
+        },
+        "links": [],
+        "legal": [
+          "2019.1.1 이후 기준 일반 요약"
+        ],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 기한/가산세 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "REVERSE_01",
+      "title": "[역발행] 과금 주체 케이스 1",
+      "category": "세금계산서",
+      "subcategory": "역발행",
+      "priority": "mid",
+      "patterns": [
+        "역발행",
+        "과금 주체",
+        "매입자 발행"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "역발행은 공급자 또는 공급받는자 중 과금 주체를 선택할 수 있습니다.",
+          "casual": "역발행은 과금 주체 선택 가능!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 역발행 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "REVERSE_02",
+      "title": "[역발행] 전자서명 케이스 2",
+      "category": "세금계산서",
+      "subcategory": "역발행",
+      "priority": "mid",
+      "patterns": [
+        "역발행",
+        "전자서명",
+        "매입자 발행"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "작성은 공급받는자가, 전자서명은 공급자가 진행해야 발급 완료됩니다.",
+          "casual": "작성은 매입처, 전자서명은 공급자!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 역발행 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "REVERSE_03",
+      "title": "[역발행] 포인트 부족 케이스 3",
+      "category": "세금계산서",
+      "subcategory": "역발행",
+      "priority": "mid",
+      "patterns": [
+        "역발행",
+        "포인트 부족",
+        "매입자 발행"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "과금 주체 포인트가 부족하면 발급이 진행되지 않습니다.",
+          "casual": "포인트 부족하면 발급 안 돼요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 역발행 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "REVERSE_04",
+      "title": "[역발행] 가입 요건 케이스 4",
+      "category": "세금계산서",
+      "subcategory": "역발행",
+      "priority": "mid",
+      "patterns": [
+        "역발행",
+        "가입 요건",
+        "매입자 발행"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "역발행은 양측 모두 회원 가입이 필요합니다.",
+          "casual": "둘 다 가입해야 역발행 가능해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 역발행 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "REVERSE_05",
+      "title": "[역발행] 수정발급 연계 케이스 5",
+      "category": "세금계산서",
+      "subcategory": "역발행",
+      "priority": "mid",
+      "patterns": [
+        "역발행",
+        "수정발급 연계",
+        "매입자 발행"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "역발행 건도 수정사유 규칙(착오정정/환입/금액변동 등)을 그대로 적용합니다.",
+          "casual": "역발행도 수정 규칙 동일해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 역발행 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "REVERSE_06",
+      "title": "[역발행] 과금 주체 케이스 6",
+      "category": "세금계산서",
+      "subcategory": "역발행",
+      "priority": "mid",
+      "patterns": [
+        "역발행",
+        "과금 주체",
+        "매입자 발행"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "역발행은 공급자 또는 공급받는자 중 과금 주체를 선택할 수 있습니다.",
+          "casual": "역발행은 과금 주체 선택 가능!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 역발행 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "REVERSE_07",
+      "title": "[역발행] 전자서명 케이스 7",
+      "category": "세금계산서",
+      "subcategory": "역발행",
+      "priority": "mid",
+      "patterns": [
+        "역발행",
+        "전자서명",
+        "매입자 발행"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "작성은 공급받는자가, 전자서명은 공급자가 진행해야 발급 완료됩니다.",
+          "casual": "작성은 매입처, 전자서명은 공급자!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 역발행 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "REVERSE_08",
+      "title": "[역발행] 포인트 부족 케이스 8",
+      "category": "세금계산서",
+      "subcategory": "역발행",
+      "priority": "mid",
+      "patterns": [
+        "역발행",
+        "포인트 부족",
+        "매입자 발행"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "과금 주체 포인트가 부족하면 발급이 진행되지 않습니다.",
+          "casual": "포인트 부족하면 발급 안 돼요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 역발행 문의"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_01",
+      "title": "인증서 갱신/등록",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "인증서 갱신/등록",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "은행/인증기관에서 갱신 후 바로빌에 재등록하세요. 저장PC가 아니어도 ‘간편발급설정’으로 발급이 가능합니다.",
+          "casual": "갱신 후 바로빌에 다시 등록! 간편발급설정 켜면 더 편해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_02",
+      "title": "현금영수증 전송",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "현금영수증 전송",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "익일 0~14시에 국세청 전송, 당일 ‘발급완료’는 취소 가능, ‘전송중’에는 취소 제한됩니다.",
+          "casual": "현영은 익일 전송, 당일만 취소 가능!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_03",
+      "title": "팩스 전송",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "팩스 전송",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "팩스는 발신 전용이며 회선/변환 사유로 전송 지연이 있을 수 있습니다.",
+          "casual": "팩스는 발신만, 가끔 느릴 수 있어요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_04",
+      "title": "카카오 알림톡",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "카카오 알림톡",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "템플릿 승인된 건만 발송되며, 야간/친구톡 제한이 적용될 수 있습니다.",
+          "casual": "알림톡은 템플릿 승인 필요해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_05",
+      "title": "문자 발신번호",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "문자 발신번호",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "KISA 발신번호 사전등록이 필요합니다.",
+          "casual": "발신번호는 KISA 등록 필수!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_06",
+      "title": "인쇄 미리보기",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "인쇄 미리보기",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "브라우저 캐시 삭제 후 크롬/엣지 최신 버전을 권장합니다.",
+          "casual": "인쇄 깨지면 캐시 지우고 최신 브라우저!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_07",
+      "title": "엑셀 업로드",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "엑셀 업로드",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "대량 발급 시 엑셀 템플릿과 필드 매핑을 확인하세요.",
+          "casual": "대량은 엑셀 템플릿이 편해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_08",
+      "title": "로그인/비번",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "로그인/비번",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "비밀번호 재설정 메일/문자 발송이 가능합니다.",
+          "casual": "비번 재설정 도와드려요!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_09",
+      "title": "인증서 갱신/등록",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "인증서 갱신/등록",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "은행/인증기관에서 갱신 후 바로빌에 재등록하세요. 저장PC가 아니어도 ‘간편발급설정’으로 발급이 가능합니다.",
+          "casual": "갱신 후 바로빌에 다시 등록! 간편발급설정 켜면 더 편해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_10",
+      "title": "현금영수증 전송",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "현금영수증 전송",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "익일 0~14시에 국세청 전송, 당일 ‘발급완료’는 취소 가능, ‘전송중’에는 취소 제한됩니다.",
+          "casual": "현영은 익일 전송, 당일만 취소 가능!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_11",
+      "title": "팩스 전송",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "팩스 전송",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "팩스는 발신 전용이며 회선/변환 사유로 전송 지연이 있을 수 있습니다.",
+          "casual": "팩스는 발신만, 가끔 느릴 수 있어요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_12",
+      "title": "카카오 알림톡",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "카카오 알림톡",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "템플릿 승인된 건만 발송되며, 야간/친구톡 제한이 적용될 수 있습니다.",
+          "casual": "알림톡은 템플릿 승인 필요해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_13",
+      "title": "문자 발신번호",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "문자 발신번호",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "KISA 발신번호 사전등록이 필요합니다.",
+          "casual": "발신번호는 KISA 등록 필수!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_14",
+      "title": "인쇄 미리보기",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "인쇄 미리보기",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "브라우저 캐시 삭제 후 크롬/엣지 최신 버전을 권장합니다.",
+          "casual": "인쇄 깨지면 캐시 지우고 최신 브라우저!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_15",
+      "title": "엑셀 업로드",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "엑셀 업로드",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "대량 발급 시 엑셀 템플릿과 필드 매핑을 확인하세요.",
+          "casual": "대량은 엑셀 템플릿이 편해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_16",
+      "title": "로그인/비번",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "로그인/비번",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "비밀번호 재설정 메일/문자 발송이 가능합니다.",
+          "casual": "비번 재설정 도와드려요!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_17",
+      "title": "인증서 갱신/등록",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "인증서 갱신/등록",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "은행/인증기관에서 갱신 후 바로빌에 재등록하세요. 저장PC가 아니어도 ‘간편발급설정’으로 발급이 가능합니다.",
+          "casual": "갱신 후 바로빌에 다시 등록! 간편발급설정 켜면 더 편해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_18",
+      "title": "현금영수증 전송",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "현금영수증 전송",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "익일 0~14시에 국세청 전송, 당일 ‘발급완료’는 취소 가능, ‘전송중’에는 취소 제한됩니다.",
+          "casual": "현영은 익일 전송, 당일만 취소 가능!"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_19",
+      "title": "팩스 전송",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "팩스 전송",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "팩스는 발신 전용이며 회선/변환 사유로 전송 지연이 있을 수 있습니다.",
+          "casual": "팩스는 발신만, 가끔 느릴 수 있어요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "MISC_20",
+      "title": "카카오 알림톡",
+      "category": "운영",
+      "subcategory": "실무",
+      "priority": "mid",
+      "patterns": [
+        "카카오 알림톡",
+        "안내",
+        "방법",
+        "이슈"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "템플릿 승인된 건만 발송되며, 야간/친구톡 제한이 적용될 수 있습니다.",
+          "casual": "알림톡은 템플릿 승인 필요해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "콜데이터: 운영 공통"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "BOT_IDENTITY",
+      "title": "너 누구니? 넌 누구야?",
+      "category": "시스템",
+      "subcategory": "봇소개",
+      "priority": "low",
+      "patterns": [
+        "너 누구니",
+        "넌 누구야",
+        "정체",
+        "챗봇"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "저는 바로빌 사용자 지원 챗봇입니다. 사내용 검증 Q/A를 우선 제공하고, 부족한 20~30% 범위에서 GPT를 보조로 사용합니다.",
+          "casual": "난 바로빌 안내 챗봇이야! 내부 검증 답변 먼저, 부족하면 GPT로 보태서 설명해줘 🙂"
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "운영 정책"
+      ],
+      "escalation": ""
+    },
+    {
+      "id": "BOT_ACCURACY",
+      "title": "정확도/출처 안내",
+      "category": "시스템",
+      "subcategory": "정책",
+      "priority": "low",
+      "patterns": [
+        "정확도",
+        "출처",
+        "근거",
+        "검증"
+      ],
+      "entities": [],
+      "answer": {
+        "template": {
+          "formal": "답변은 교육자료·운영정책·콜케이스 기반입니다. 법령/정책 변경 시 업데이트되며, 세무 해석이 필요한 건 담당 세무사 확인을 권장합니다.",
+          "casual": "답변은 내부 자료+실제 케이스 기반! 법/정책 바뀌면 업데이트하고, 애매한 세무는 세무사 확인 추천해요."
+        },
+        "links": [],
+        "legal": [],
+        "disclaimer": "상황·금액·기간에 따라 예외가 있을 수 있습니다."
+      },
+      "channel": [
+        "site"
+      ],
+      "source": [
+        "운영 정책"
+      ],
+      "escalation": ""
+    }
+  ]
+}

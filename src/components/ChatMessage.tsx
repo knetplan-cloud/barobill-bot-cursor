@@ -58,7 +58,7 @@ export const ChatMessage = ({ role, content, timestamp, isTyping, relatedGuides,
             </div>
           ) : (
             <>
-              <p className="text-sm leading-normal whitespace-pre-wrap">{content}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
               
               {/* Related Guides - Inside message bubble */}
               {relatedGuides && relatedGuides.length > 0 && (

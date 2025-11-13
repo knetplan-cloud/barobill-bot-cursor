@@ -1,5 +1,6 @@
 import knowledgeBase from "@/data/barobill-knowledge-base.json";
 import chatbotDataset from "@/data/barobill-chatbot-dataset.json";
+import casesKnowledgeBase from "@/data/barobill-knowledge-base.cases.v3.json";
 
 export type ToneType = "formal" | "casual";
 
@@ -35,12 +36,16 @@ const containsKeywords = (query: string, keywords: string[]): boolean => {
   });
 };
 
-// Extract synonyms from dataset
+// Extract synonyms from dataset (including cases knowledge base)
 const getSynonyms = (word: string): string[] => {
-  const synonyms = (chatbotDataset as any).nlu?.synonyms || {};
+  const datasetSynonyms = (chatbotDataset as any).nlu?.synonyms || {};
+  const casesSynonyms = (casesKnowledgeBase as any).synonyms || {};
+  
+  // Merge synonyms from both sources
+  const allSynonyms = { ...datasetSynonyms, ...casesSynonyms };
   
   // Find the key that contains this word
-  for (const [key, values] of Object.entries(synonyms)) {
+  for (const [key, values] of Object.entries(allSynonyms)) {
     if (normalizeText(key) === normalizeText(word) || 
         (Array.isArray(values) && values.some(v => normalizeText(v) === normalizeText(word)))) {
       return [key, ...(Array.isArray(values) ? values : [])];
@@ -71,6 +76,7 @@ const expandQueryWithSynonyms = (query: string): string[] => {
 export const matchQuery = (query: string, tone: ToneType): MatchResult => {
   const kb = knowledgeBase as any;
   const dataset = chatbotDataset as any;
+  const casesKb = casesKnowledgeBase as any;
   const expandedQueries = expandQueryWithSynonyms(query);
   
   // PRIORITY 1: Check intents first (for greetings, system commands, etc.)
@@ -95,7 +101,56 @@ export const matchQuery = (query: string, tone: ToneType): MatchResult => {
     }
   }
   
-  // PRIORITY 2: Try to find a match in knowledge_base
+  // PRIORITY 2: Try cases knowledge base (high priority for specific tax cases)
+  const casesKnowledgeBaseItems = casesKb.knowledge_base || [];
+  let bestMatch: { score: number; result: MatchResult | null } = { score: 0, result: null };
+  
+  for (const item of casesKnowledgeBaseItems) {
+    const patterns = item.patterns || [];
+    
+    for (const expandedQuery of expandedQueries) {
+      // Calculate match score based on pattern matches
+      let matchScore = 0;
+      
+      for (const pattern of patterns) {
+        if (containsKeywords(expandedQuery, [pattern])) {
+          matchScore += 1;
+          // Boost score for high priority items
+          if (item.priority === "high") matchScore += 2;
+          else if (item.priority === "mid") matchScore += 1;
+        }
+      }
+      
+      if (matchScore > bestMatch.score) {
+        const responseType = tone === "formal" ? "formal" : "casual";
+        const templateResponse = item.answer?.template?.[responseType];
+        
+        if (templateResponse) {
+          bestMatch = {
+            score: matchScore,
+            result: {
+              found: true,
+              response: templateResponse,
+              relatedGuides: item.answer?.links?.map((link: any) => ({
+                title: link.title || "관련 링크",
+                url: link.url || "#",
+                description: link.description || "",
+                icon: "📄",
+              })) || [],
+              followUpQuestions: [],
+            }
+          };
+        }
+      }
+    }
+  }
+  
+  // If we found a good match in cases knowledge base, return it
+  if (bestMatch.score > 0 && bestMatch.result) {
+    return bestMatch.result;
+  }
+  
+  // PRIORITY 3: Try to find a match in original knowledge_base
   for (const [, item] of Object.entries(kb.knowledge_base || {})) {
     const entry = item as any;
     
@@ -130,7 +185,7 @@ export const matchQuery = (query: string, tone: ToneType): MatchResult => {
     }
   }
   
-  // PRIORITY 3: Try to find match in chatbot_dataset qa_pairs
+  // PRIORITY 4: Try to find match in chatbot_dataset qa_pairs
   const qaPairs = dataset.qa_pairs || [];
   
   for (const pair of qaPairs) {
@@ -155,7 +210,7 @@ export const matchQuery = (query: string, tone: ToneType): MatchResult => {
     }
   }
   
-  // PRIORITY 4: Return fallback message from dataset
+  // PRIORITY 5: Return fallback message from dataset
   const fallbacks = dataset.fallbacks || {};
   const fallbackMessages = fallbacks.out_of_scope || 
     "죄송합니다. 해당 질문에 대한 답변을 찾지 못했습니다. 다른 방식으로 질문해 주시거나, 바로빌 고객센터(1600-6399)로 문의해 주세요. 📞";
