@@ -8,6 +8,7 @@ import { ChatMessage } from "./ChatMessage";
 import { QuickQuestionButton } from "./QuickQuestionButton";
 import { matchQuery, detectTone, type ToneType } from "@/lib/chatbot-engine";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -59,21 +60,70 @@ export const ChatInterface = ({
     // Simulate typing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Try to match query
+    // Try to match query in local knowledge base
     const detectedTone = detectTone(userMessage);
     const finalTone = tone; // Use user's selected tone preference
     const result = matchQuery(userMessage, finalTone);
 
-    // Always show response if available (from matched content or fallback)
-    const assistantMsg: Message = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: result.response || (finalTone === "formal" ? "죄송합니다! 😢 해당 질문에 대한 정보를 찾지 못했습니다.\n좀 더 구체적으로 질문해주시거나, 바로빌 고객센터(1544-8385)로 문의해주시기 바랍니다." : "미안! 😅 그 질문은 아직 잘 모르겠어.\n좀 더 자세히 물어봐주거나, 바로빌 고객센터(1544-8385)로 연락해봐!"),
-      timestamp: new Date(),
-      relatedGuides: result.relatedGuides,
-      followUpQuestions: result.followUpQuestions
-    };
-    setMessages(prev => [...prev, assistantMsg]);
+    // Check if AI assistance is needed
+    if (result.requiresAI) {
+      try {
+        console.log('Calling AI for question:', userMessage);
+        const { data, error } = await supabase.functions.invoke('ai-chat', {
+          body: { 
+            question: userMessage,
+            tone: finalTone 
+          }
+        });
+
+        if (error) {
+          console.error('AI function error:', error);
+          throw error;
+        }
+
+        if (data?.error) {
+          // Handle specific AI errors
+          if (data.error === 'rate_limit') {
+            toast.error(data.message || '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.');
+          } else if (data.error === 'payment_required') {
+            toast.error(data.message || 'AI 사용량이 초과되었습니다.');
+          }
+          throw new Error(data.message);
+        }
+
+        // AI response successful
+        const assistantMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: data.response || result.response || (finalTone === "formal" ? "죄송합니다. 답변을 생성하지 못했습니다." : "미안, 답변을 만들지 못했어."),
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+        
+      } catch (error) {
+        console.error('Error calling AI:', error);
+        // Fallback to local error message
+        const assistantMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: result.response || (finalTone === "formal" ? "죄송합니다! 😢 해당 질문에 대한 정보를 찾지 못했습니다.\n좀 더 구체적으로 질문해주시거나, 바로빌 고객센터(1544-8385)로 문의해주시기 바랍니다." : "미안! 😅 그 질문은 아직 잘 모르겠어.\n좀 더 자세히 물어봐주거나, 바로빌 고객센터(1544-8385)로 연락해봐!"),
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+      }
+    } else {
+      // Local knowledge base match found
+      const assistantMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: result.response || (finalTone === "formal" ? "죄송합니다! 😢 해당 질문에 대한 정보를 찾지 못했습니다.\n좀 더 구체적으로 질문해주시거나, 바로빌 고객센터(1544-8385)로 문의해주시기 바랍니다." : "미안! 😅 그 질문은 아직 잘 모르겠어.\n좀 더 자세히 물어봐주거나, 바로빌 고객센터(1544-8385)로 연락해봐!"),
+        timestamp: new Date(),
+        relatedGuides: result.relatedGuides,
+        followUpQuestions: result.followUpQuestions
+      };
+      setMessages(prev => [...prev, assistantMsg]);
+    }
+    
     setIsTyping(false);
   };
   const handleQuickQuestion = (question: string) => {

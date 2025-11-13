@@ -14,6 +14,8 @@ interface MatchResult {
     icon: string;
   }>;
   followUpQuestions?: string[];
+  requiresAI?: boolean;
+  query?: string;
 }
 
 // Normalize text for comparison (more aggressive for flexible matching)
@@ -210,13 +212,15 @@ export const matchQuery = (query: string, tone: ToneType): MatchResult => {
     }
   }
   
-  // PRIORITY 5: Return fallback message from dataset
+  // PRIORITY 5: Return fallback - request AI assistance
   const fallbacks = dataset.fallbacks || {};
   const fallbackMessages = fallbacks.out_of_scope || 
     "죄송합니다. 해당 질문에 대한 답변을 찾지 못했습니다. 다른 방식으로 질문해 주시거나, 바로빌 고객센터(1600-6399)로 문의해 주세요. 📞";
   
   return { 
     found: false,
+    requiresAI: true,
+    query: query,
     response: fallbackMessages
   };
 };
