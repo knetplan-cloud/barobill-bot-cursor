@@ -73,8 +73,15 @@ export const ChatMessage = ({ role, content, timestamp, isTyping, relatedGuides,
                       </div>
                     );
                   } else {
-                    // 일반 텍스트는 단락별로 작은 간격
-                    return <p key={idx} className="leading-relaxed">{paragraph}</p>;
+                    // 일반 텍스트는 마침표 기준으로 문장 분리
+                    const sentences = paragraph.split(/(?<=\.)\s+/).filter(s => s.trim());
+                    return (
+                      <div key={idx} className="space-y-1">
+                        {sentences.map((sentence, sIdx) => (
+                          <p key={sIdx} className="leading-relaxed">{sentence}</p>
+                        ))}
+                      </div>
+                    );
                   }
                 })}
               </div>
