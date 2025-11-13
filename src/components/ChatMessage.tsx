@@ -63,22 +63,45 @@ export const ChatMessage = ({ role, content, timestamp, isTyping, relatedGuides,
                   // 넘버링 리스트 감지 (1. 2. 3. 등으로 시작)
                   const hasNumbering = /^\d+\./.test(paragraph.trim());
                   
+                  // 대괄호로 감싸진 키워드 강조 처리 함수
+                  const highlightKeywords = (text: string) => {
+                    const parts = text.split(/(\[.*?\])/g);
+                    return parts.map((part, partIdx) => {
+                      if (/^\[.*?\]$/.test(part)) {
+                        // 대괄호로 감싸진 키워드는 남색으로 강조
+                        return (
+                          <span key={partIdx} className="font-semibold text-blue-700 dark:text-blue-400">
+                            {part}
+                          </span>
+                        );
+                      }
+                      return part;
+                    });
+                  };
+                  
                   if (hasNumbering) {
                     // 넘버링 리스트는 각 항목에 작은 간격
                     return (
                       <div key={idx} className="space-y-1">
                         {paragraph.split('\n').map((line, lineIdx) => (
-                          <p key={lineIdx}>{line}</p>
+                          <p key={lineIdx}>{highlightKeywords(line)}</p>
                         ))}
                       </div>
                     );
                   } else {
                     // 일반 텍스트는 마침표 기준으로 문장 분리
                     const sentences = paragraph.split(/(?<=\.)\s+/).filter(s => s.trim());
+                    
+                    // 기본 안내 문구인지 확인 (짧은 문장, 안내성 키워드 포함)
+                    const isIntroText = sentences.length <= 2 && 
+                      sentences.some(s => /안내|말씀|설명|도움|궁금|문의/.test(s));
+                    
                     return (
-                      <div key={idx} className="space-y-1">
+                      <div key={idx} className={isIntroText ? "space-y-0.5" : "space-y-1"}>
                         {sentences.map((sentence, sIdx) => (
-                          <p key={sIdx} className="leading-relaxed">{sentence}</p>
+                          <p key={sIdx} className="leading-relaxed">
+                            {highlightKeywords(sentence)}
+                          </p>
                         ))}
                       </div>
                     );
