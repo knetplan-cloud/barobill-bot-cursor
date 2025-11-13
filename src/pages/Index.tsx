@@ -34,8 +34,8 @@ const Index = () => {
         </div>
 
         {/* Main Content */}
-        <div className="grid lg:grid-cols-[1fr_280px] gap-6">
-          <div className="lg:col-span-2">
+        <div className="grid lg:grid-cols-[3fr_1fr] gap-6">
+          <div>
             <Tabs defaultValue="chat" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="chat">AI 챗봇</TabsTrigger>
