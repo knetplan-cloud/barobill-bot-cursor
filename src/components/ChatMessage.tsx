@@ -58,7 +58,26 @@ export const ChatMessage = ({ role, content, timestamp, isTyping, relatedGuides,
             </div>
           ) : (
             <>
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+              <div className="text-sm leading-relaxed space-y-2">
+                {content.split('\n\n').map((paragraph, idx) => {
+                  // 넘버링 리스트 감지 (1. 2. 3. 등으로 시작)
+                  const hasNumbering = /^\d+\./.test(paragraph.trim());
+                  
+                  if (hasNumbering) {
+                    // 넘버링 리스트는 각 항목에 작은 간격
+                    return (
+                      <div key={idx} className="space-y-1">
+                        {paragraph.split('\n').map((line, lineIdx) => (
+                          <p key={lineIdx}>{line}</p>
+                        ))}
+                      </div>
+                    );
+                  } else {
+                    // 일반 텍스트는 단락별로 작은 간격
+                    return <p key={idx} className="leading-relaxed">{paragraph}</p>;
+                  }
+                })}
+              </div>
               
               {/* Related Guides - Inside message bubble */}
               {relatedGuides && relatedGuides.length > 0 && (
