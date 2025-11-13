@@ -97,9 +97,9 @@ export const ChatMessage = ({ role, content, timestamp, isTyping, relatedGuides,
                       sentences.some(s => /안내|말씀|설명|도움|궁금|문의/.test(s));
                     
                     return (
-                      <div key={idx} className={isIntroText ? "space-y-0.5" : "space-y-1"}>
+                      <div key={idx} className={isIntroText ? "space-y-0" : "space-y-0.5"}>
                         {sentences.map((sentence, sIdx) => (
-                          <p key={sIdx} className="leading-relaxed">
+                          <p key={sIdx} className="leading-normal">
                             {highlightKeywords(sentence)}
                           </p>
                         ))}
