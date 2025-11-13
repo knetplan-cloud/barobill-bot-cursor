@@ -1,0 +1,122 @@
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
+import { QuickQuestionButton } from "./QuickQuestionButton";
+interface ChatMessageProps {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+  isTyping?: boolean;
+  relatedGuides?: Array<{
+    title: string;
+    url: string;
+    description?: string;
+    icon?: string;
+  }>;
+  followUpQuestions?: string[];
+  onQuestionClick?: (question: string) => void;
+}
+export const ChatMessage = ({
+  role,
+  content,
+  timestamp,
+  isTyping,
+  relatedGuides,
+  followUpQuestions,
+  onQuestionClick
+}: ChatMessageProps) => {
+  const isUser = role === "user";
+  return <div className={cn("flex gap-3 mb-4", isUser && "flex-row-reverse")}>
+      <div className="flex flex-col items-center gap-1 flex-shrink-0">
+        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-xl", isUser ? "bg-muted" : "bg-gradient-to-br from-primary to-primary-dark shadow-md")}>
+          {isUser ? "👤" : "🤖"}
+        </div>
+        {!isUser && <span className="text-[10px] font-semibold text-primary whitespace-nowrap">
+            빌리 AI
+          </span>}
+      </div>
+      
+      <div className={cn("flex flex-col max-w-[75%]", isUser && "items-end")}>
+        <div className={cn("rounded-2xl px-4 py-3 transition-all duration-300", isUser ? "bg-primary text-primary-foreground rounded-tr-sm" : "bg-card border border-border rounded-tl-sm shadow-sm")}>
+          {isTyping ? <div className="flex gap-1">
+              <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{
+            animationDelay: "0ms"
+          }} />
+              <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{
+            animationDelay: "150ms"
+          }} />
+              <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{
+            animationDelay: "300ms"
+          }} />
+            </div> : <>
+              <div className="text-sm space-y-2">
+                {content.split('\n\n').map((paragraph, idx) => {
+              // 대괄호로 감싸진 키워드 강조 처리 함수
+              const highlightKeywords = (text: string) => {
+                const parts = text.split(/(\[.*?\])/g);
+                return parts.map((part, partIdx) => {
+                  if (/^\[.*?\]$/.test(part)) {
+                    // 대괄호로 감싸진 키워드는 남색으로 강조
+                    return <span key={partIdx} className="font-semibold text-blue-700 dark:text-blue-400">
+                            {part}
+                          </span>;
+                  }
+                  return part;
+                });
+              };
+
+              // 넘버링 리스트 감지 (1. 2. 3. 등으로 시작)
+              const hasNumbering = /^\d+\./.test(paragraph.trim());
+              
+              if (hasNumbering) {
+                // 넘버링 리스트는 각 항목에 작은 간격
+                return <div key={idx} className="space-y-1">
+                        {paragraph.split('\n').map((line, lineIdx) => 
+                          <p key={lineIdx} className="font-medium leading-relaxed whitespace-pre-wrap">
+                            {highlightKeywords(line)}
+                          </p>
+                        )}
+                      </div>;
+              } else {
+                // 일반 단락은 whitespace-pre-wrap으로 원본 줄바꿈 유지
+                return <p key={idx} className="leading-relaxed whitespace-pre-wrap">
+                        {highlightKeywords(paragraph)}
+                      </p>;
+              }
+            })}
+              </div>
+              
+              {/* Related Guides - Inside message bubble */}
+              {relatedGuides && relatedGuides.length > 0 && <div className="mt-4 pt-4 border-t border-border/50 space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                    📚 관련 가이드
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {relatedGuides.slice(0, 2).map((guide, idx) => <Button key={idx} variant="outline" size="sm" className="text-xs h-auto py-2" onClick={() => window.open(guide.url, "_blank")}>
+                        {guide.icon && <span className="mr-1">{guide.icon}</span>}
+                        {guide.title}
+                        <ExternalLink className="w-3 h-3 ml-1" />
+                      </Button>)}
+                  </div>
+                </div>}
+              
+              {/* Follow-up Questions - Inside message bubble */}
+              {followUpQuestions && followUpQuestions.length > 0 && onQuestionClick && <div className="mt-4 pt-4 border-t border-border/50 space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                    💡 이런 것도 궁금하신가요?
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {followUpQuestions.slice(0, 2).map((question, idx) => <QuickQuestionButton key={idx} question={question} onClick={onQuestionClick} />)}
+                  </div>
+                </div>}
+            </>}
+        </div>
+        <span className="text-xs text-muted-foreground mt-1 px-1">
+          {timestamp.toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit"
+        })}
+        </span>
+      </div>
+    </div>;
+};
