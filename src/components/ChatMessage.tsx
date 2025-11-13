@@ -1,13 +1,24 @@
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
+import { QuickQuestionButton } from "./QuickQuestionButton";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
   isTyping?: boolean;
+  relatedGuides?: Array<{
+    title: string;
+    url: string;
+    description: string;
+    icon: string;
+  }>;
+  followUpQuestions?: string[];
+  onQuestionClick?: (question: string) => void;
 }
 
-export const ChatMessage = ({ role, content, timestamp, isTyping }: ChatMessageProps) => {
+export const ChatMessage = ({ role, content, timestamp, isTyping, relatedGuides, followUpQuestions, onQuestionClick }: ChatMessageProps) => {
   const isUser = role === "user";
 
   return (
@@ -46,7 +57,51 @@ export const ChatMessage = ({ role, content, timestamp, isTyping }: ChatMessageP
               <span className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
           ) : (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{content}</p>
+            <>
+              <p className="text-sm leading-normal whitespace-pre-wrap">{content}</p>
+              
+              {/* Related Guides - Inside message bubble */}
+              {relatedGuides && relatedGuides.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border/50 space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                    📚 관련 가이드
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {relatedGuides.map((guide, idx) => (
+                      <Button
+                        key={idx}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-auto py-2"
+                        onClick={() => window.open(guide.url, "_blank")}
+                      >
+                        <span className="mr-1">{guide.icon}</span>
+                        {guide.title}
+                        <ExternalLink className="w-3 h-3 ml-1" />
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Follow-up Questions - Inside message bubble */}
+              {followUpQuestions && followUpQuestions.length > 0 && onQuestionClick && (
+                <div className="mt-4 pt-4 border-t border-border/50 space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                    💡 이런 것도 궁금하신가요?
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {followUpQuestions.map((question, idx) => (
+                      <QuickQuestionButton
+                        key={idx}
+                        question={question}
+                        onClick={onQuestionClick}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
         <span className="text-xs text-muted-foreground mt-1 px-1">

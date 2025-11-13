@@ -117,55 +117,15 @@ export const ChatInterface = ({ tone }: ChatInterfaceProps) => {
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         {messages.map((message) => (
-          <div key={message.id}>
-            <ChatMessage
-              role={message.role}
-              content={message.content}
-              timestamp={message.timestamp}
-            />
-            
-            {/* Related Guides */}
-            {message.relatedGuides && message.relatedGuides.length > 0 && (
-              <div className="ml-14 mb-4 space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                  📚 관련 가이드
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {message.relatedGuides.map((guide, idx) => (
-                    <Button
-                      key={idx}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-auto py-2"
-                      onClick={() => window.open(guide.url, "_blank")}
-                    >
-                      <span className="mr-1">{guide.icon}</span>
-                      {guide.title}
-                      <ExternalLink className="w-3 h-3 ml-1" />
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Follow-up Questions */}
-            {message.followUpQuestions && message.followUpQuestions.length > 0 && (
-              <div className="ml-14 mb-4 space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                  💡 이런 것도 궁금하신가요?
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {message.followUpQuestions.map((question, idx) => (
-                    <QuickQuestionButton
-                      key={idx}
-                      question={question}
-                      onClick={handleQuickQuestion}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          <ChatMessage
+            key={message.id}
+            role={message.role}
+            content={message.content}
+            timestamp={message.timestamp}
+            relatedGuides={message.relatedGuides}
+            followUpQuestions={message.followUpQuestions}
+            onQuestionClick={handleQuickQuestion}
+          />
         ))}
         {isTyping && (
           <ChatMessage
