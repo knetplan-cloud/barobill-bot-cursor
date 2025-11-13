@@ -78,33 +78,22 @@ export const ChatInterface = ({ tone }: ChatInterfaceProps) => {
     const finalTone = tone; // Use user's selected tone preference
     const result = matchQuery(userMessage, finalTone);
 
-    if (result.found && result.response) {
-      const assistantMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: result.response,
-        timestamp: new Date(),
-        relatedGuides: result.relatedGuides,
-        followUpQuestions: result.followUpQuestions,
-      };
-      
-      setMessages((prev) => [...prev, assistantMsg]);
-      setIsTyping(false);
-    } else {
-      // Use GPT API fallback for unmatched queries
-      const fallbackMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content:
-          finalTone === "formal"
-            ? "죄송합니다! 😢 해당 질문에 대한 정보를 찾지 못했습니다.\n좀 더 구체적으로 질문해주시거나, 바로빌 고객센터(1544-8385)로 문의해주시기 바랍니다."
-            : "미안! 😅 그 질문은 아직 잘 모르겠어.\n좀 더 자세히 물어봐주거나, 바로빌 고객센터(1544-8385)로 연락해봐!",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, fallbackMsg]);
-      setIsTyping(false);
-    }
+    // Always show response if available (from matched content or fallback)
+    const assistantMsg: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: result.response || (
+        finalTone === "formal"
+          ? "죄송합니다! 😢 해당 질문에 대한 정보를 찾지 못했습니다.\n좀 더 구체적으로 질문해주시거나, 바로빌 고객센터(1544-8385)로 문의해주시기 바랍니다."
+          : "미안! 😅 그 질문은 아직 잘 모르겠어.\n좀 더 자세히 물어봐주거나, 바로빌 고객센터(1544-8385)로 연락해봐!"
+      ),
+      timestamp: new Date(),
+      relatedGuides: result.relatedGuides,
+      followUpQuestions: result.followUpQuestions,
+    };
+    
+    setMessages((prev) => [...prev, assistantMsg]);
+    setIsTyping(false);
   };
 
   const handleQuickQuestion = (question: string) => {

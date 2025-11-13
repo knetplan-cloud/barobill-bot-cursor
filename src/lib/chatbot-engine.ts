@@ -15,17 +15,24 @@ interface MatchResult {
   followUpQuestions?: string[];
 }
 
-// Normalize text for comparison
+// Normalize text for comparison (more aggressive for flexible matching)
 const normalizeText = (text: string): string => {
-  return text.toLowerCase().trim().replace(/\s+/g, " ");
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[!?.,;:]/g, "") // Remove punctuation
+    .replace(/\s+/g, " "); // Normalize whitespace
 };
 
-// Check if query contains any of the keywords
+// Check if query contains any of the keywords (flexible partial matching)
 const containsKeywords = (query: string, keywords: string[]): boolean => {
   const normalizedQuery = normalizeText(query);
-  return keywords.some((keyword) =>
-    normalizedQuery.includes(normalizeText(keyword))
-  );
+  return keywords.some((keyword) => {
+    const normalizedKeyword = normalizeText(keyword);
+    // Support partial matching: "안녕" matches "안녕하세요"
+    return normalizedQuery.includes(normalizedKeyword) || 
+           normalizedKeyword.includes(normalizedQuery);
+  });
 };
 
 // Extract synonyms from dataset
@@ -60,12 +67,35 @@ const expandQueryWithSynonyms = (query: string): string[] => {
   return expandedQueries;
 };
 
-// Match query against knowledge base
+// Match query against intents, knowledge base, and dataset
 export const matchQuery = (query: string, tone: ToneType): MatchResult => {
   const kb = knowledgeBase as any;
+  const dataset = chatbotDataset as any;
   const expandedQueries = expandQueryWithSynonyms(query);
   
-  // Try to find a match in knowledge_base
+  // PRIORITY 1: Check intents first (for greetings, system commands, etc.)
+  const intents = dataset.intents || [];
+  for (const intent of intents) {
+    const patterns = intent.patterns || [];
+    
+    for (const expandedQuery of expandedQueries) {
+      if (containsKeywords(expandedQuery, patterns)) {
+        const responseType = tone === "formal" ? "polite" : "casual";
+        const response = intent.response?.[responseType] || intent.response?.polite;
+        
+        if (response) {
+          return {
+            found: true,
+            response: response,
+            relatedGuides: [],
+            followUpQuestions: [],
+          };
+        }
+      }
+    }
+  }
+  
+  // PRIORITY 2: Try to find a match in knowledge_base
   for (const [, item] of Object.entries(kb.knowledge_base || {})) {
     const entry = item as any;
     
@@ -100,8 +130,7 @@ export const matchQuery = (query: string, tone: ToneType): MatchResult => {
     }
   }
   
-  // Try to find match in chatbot_dataset
-  const dataset = chatbotDataset as any;
+  // PRIORITY 3: Try to find match in chatbot_dataset qa_pairs
   const qaPairs = dataset.qa_pairs || [];
   
   for (const pair of qaPairs) {
@@ -126,7 +155,15 @@ export const matchQuery = (query: string, tone: ToneType): MatchResult => {
     }
   }
   
-  return { found: false };
+  // PRIORITY 4: Return fallback message from dataset
+  const fallbacks = dataset.fallbacks || {};
+  const fallbackMessages = fallbacks.out_of_scope || 
+    "죄송합니다. 해당 질문에 대한 답변을 찾지 못했습니다. 다른 방식으로 질문해 주시거나, 바로빌 고객센터(1600-6399)로 문의해 주세요. 📞";
+  
+  return { 
+    found: false,
+    response: fallbackMessages
+  };
 };
 
 // Detect tone from user input
