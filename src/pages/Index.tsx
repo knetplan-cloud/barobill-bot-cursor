@@ -43,7 +43,7 @@ const Index = () => {
           </div>
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">바로빌 AI 빌리</h1>
           <p className="text-lg text-muted-foreground mb-4">
-            세금계산서 발급 전문 AI 상담사
+            세금 고민, 이제 빌리와 함께 해결하세요!
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Sparkles className="w-4 h-4 text-primary" />
