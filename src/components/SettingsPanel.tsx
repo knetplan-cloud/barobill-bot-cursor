@@ -76,14 +76,14 @@ export const SettingsPanel = ({ tone, onToneChange }: SettingsPanelProps) => {
       {/* 피드백 입력 - 새로 추가 */}
       <div className="pt-4 border-t border-border">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <MessageSquare className="w-5 h-5" />
+          <MessageSquare className="w-4 h-4" />
           챗봇 개선 의견
         </h3>
         <Textarea
           placeholder="챗봇 개선을 위한 의견이나 불편사항을 남겨주세요..."
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
-          rows={4}
+          rows={3}
           className="mb-3"
         />
         <Button
@@ -94,7 +94,7 @@ export const SettingsPanel = ({ tone, onToneChange }: SettingsPanelProps) => {
           {isSubmitting ? "전송 중..." : "의견 제출"}
         </Button>
         <p className="text-xs text-muted-foreground mt-2">
-          여러분의 소중한 의견이 챗봇 개선에 큰 도움이 됩니다.
+          소중한 의견이 챗봇 개선에 도움이 됩니다.
         </p>
       </div>
     </Card>

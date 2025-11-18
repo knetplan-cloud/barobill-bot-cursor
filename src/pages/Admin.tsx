@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Download, Plus, Pencil, Trash2, Eye, Home, RefreshCw, MessageSquare } from "lucide-react";
+import { Download, Plus, Pencil, Trash2, Eye, Home, RefreshCw, MessageSquare, Calendar } from "lucide-react";
 import unifiedData from "@/data/barobill-knowledge.json";
 import faqData from "@/data/barobill-faq.json";
 import { useNavigate } from "react-router-dom";
@@ -70,6 +70,16 @@ type FAQItem = {
   relatedKnowledgeId?: string;
 };
 
+type Holiday = {
+  id: string;
+  date: string;
+  name: string;
+  year: number;
+  is_custom: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
 const Admin = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<KnowledgeItem[]>(unifiedData.items as KnowledgeItem[]);
@@ -79,6 +89,10 @@ const Admin = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("knowledge");
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [newHolidayDate, setNewHolidayDate] = useState("");
+  const [newHolidayName, setNewHolidayName] = useState("");
+  const [holidayYear, setHolidayYear] = useState(new Date().getFullYear());
   
   // 카테고리 목록 추출 및 관리
   const getCategories = (): string[] => {
@@ -223,6 +237,81 @@ const Admin = () => {
     }
   };
 
+  // 공휴일 관리 함수들
+  const loadHolidays = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("holidays")
+        .select("*")
+        .order("date", { ascending: true });
+
+      if (error) throw error;
+      setHolidays(data || []);
+    } catch (error) {
+      console.error("Error loading holidays:", error);
+      toast.error("공휴일을 불러오는데 실패했습니다.");
+    }
+  };
+
+  const handleAddHoliday = async () => {
+    if (!newHolidayDate || !newHolidayName.trim()) {
+      toast.error("날짜와 공휴일명을 입력해주세요.");
+      return;
+    }
+
+    try {
+      const dateObj = new Date(newHolidayDate);
+      const year = dateObj.getFullYear();
+
+      const { error } = await supabase
+        .from("holidays")
+        .insert({
+          date: newHolidayDate,
+          name: newHolidayName.trim(),
+          year: year,
+          is_custom: true
+        });
+
+      if (error) throw error;
+      toast.success("공휴일이 추가되었습니다.");
+      setNewHolidayDate("");
+      setNewHolidayName("");
+      loadHolidays();
+    } catch (error: any) {
+      console.error("Error adding holiday:", error);
+      if (error.code === "23505") {
+        toast.error("이미 등록된 날짜입니다.");
+      } else {
+        toast.error("공휴일 추가에 실패했습니다.");
+      }
+    }
+  };
+
+  const handleDeleteHoliday = async (id: string) => {
+    if (!confirm("정말 이 공휴일을 삭제하시겠습니까?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("holidays")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      toast.success("공휴일이 삭제되었습니다.");
+      loadHolidays();
+    } catch (error) {
+      console.error("Error deleting holiday:", error);
+      toast.error("공휴일 삭제에 실패했습니다.");
+    }
+  };
+
+  // 공휴일 탭 활성화 시 로드
+  useEffect(() => {
+    if (activeTab === "holidays") {
+      loadHolidays();
+    }
+  }, [activeTab]);
+
   // 필터링된 항목
   const filteredItems = items.filter(item => {
     const matchesType = filterType === "all" || item.type === filterType;
@@ -310,18 +399,23 @@ const Admin = () => {
           </div>
         </Card>
 
-        {/* Tabs로 지식베이스, FAQ, 피드백 관리 분리 */}
+        {/* Tabs로 지식베이스, FAQ, 피드백, 공휴일 관리 분리 */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="knowledge">지식베이스 관리</TabsTrigger>
             <TabsTrigger value="faq">FAQ 관리</TabsTrigger>
             <TabsTrigger value="feedback">
+              <MessageSquare className="w-4 h-4 mr-2" />
               피드백 관리
               {feedbacks.length > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {feedbacks.length}
                 </Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="holidays">
+              <Calendar className="w-4 h-4 mr-2" />
+              공휴일 관리
             </TabsTrigger>
           </TabsList>
 
@@ -442,6 +536,120 @@ const Admin = () => {
 
           <TabsContent value="faq">
             <FAQManagementSection />
+          </TabsContent>
+
+          <TabsContent value="holidays">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">공휴일 관리</h2>
+                <Button variant="outline" onClick={loadHolidays}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  새로고침
+                </Button>
+              </div>
+
+              {/* 공휴일 추가 폼 */}
+              <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                <h3 className="text-sm font-semibold mb-3">새 공휴일 추가</h3>
+                <div className="flex gap-2 flex-wrap">
+                  <Input
+                    type="date"
+                    value={newHolidayDate}
+                    onChange={(e) => setNewHolidayDate(e.target.value)}
+                    placeholder="날짜 선택"
+                    className="w-40"
+                  />
+                  <Input
+                    value={newHolidayName}
+                    onChange={(e) => setNewHolidayName(e.target.value)}
+                    placeholder="공휴일명 (예: 임시공휴일)"
+                    className="flex-1 min-w-40"
+                  />
+                  <Button onClick={handleAddHoliday}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    추가
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  💡 사용자 지정 공휴일을 추가하면 날짜 계산 시 자동으로 반영됩니다.
+                </p>
+              </div>
+
+              {/* 연도별 필터 */}
+              <div className="mb-4">
+                <Label className="mr-2">연도:</Label>
+                <Select value={holidayYear.toString()} onValueChange={(v) => setHolidayYear(parseInt(v))}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[2024, 2025, 2026, 2027, 2028].map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}년</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* 공휴일 목록 */}
+              <div className="space-y-2">
+                {holidays
+                  .filter(h => h.year === holidayYear)
+                  .map((holiday) => (
+                    <Card key={holiday.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <div className="font-semibold">{holiday.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(holiday.date).toLocaleDateString('ko-KR', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric',
+                                weekday: 'long'
+                              })}
+                            </div>
+                          </div>
+                          <Badge variant={holiday.is_custom ? "default" : "secondary"}>
+                            {holiday.is_custom ? "사용자 지정" : "법정 공휴일"}
+                          </Badge>
+                        </div>
+                        {holiday.is_custom && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteHoliday(holiday.id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                {holidays.filter(h => h.year === holidayYear).length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {holidayYear}년 공휴일이 없습니다.
+                  </div>
+                )}
+              </div>
+
+              {/* 통계 */}
+              <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">법정 공휴일:</span>
+                    <span className="ml-2 font-semibold">
+                      {holidays.filter(h => h.year === holidayYear && !h.is_custom).length}개
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">사용자 지정:</span>
+                    <span className="ml-2 font-semibold">
+                      {holidays.filter(h => h.year === holidayYear && h.is_custom).length}개
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </TabsContent>
 
           <TabsContent value="feedback">

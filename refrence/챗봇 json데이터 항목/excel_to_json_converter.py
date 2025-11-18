@@ -27,6 +27,7 @@ class ChatbotDataConverter:
             "synonyms": {},
             "items": []
         }
+        self.faq_data = None
         
     def load_excel(self) -> Dict[str, pd.DataFrame]:
         """엑셀 파일의 모든 시트 로드"""
@@ -92,6 +93,14 @@ class ChatbotDataConverter:
             if pd.notna(row.get('관련가이드URL')) and str(row.get('관련가이드URL')).strip() != '-':
                 item["relatedGuides"] = self._parse_guides(row.get('관련가이드URL', ''))
             
+            # 관련 질문 목록 (선택)
+            if pd.notna(row.get('관련 질문 목록')) and str(row.get('관련 질문 목록')).strip() != '-':
+                item["relatedQuestions"] = self._parse_keywords(row.get('관련 질문 목록', ''))
+            
+            # 추천 후속 질문 (선택)
+            if pd.notna(row.get('추천 후속 질문')) and str(row.get('추천 후속 질문')).strip() != '-':
+                item["followUpQuestions"] = self._parse_keywords(row.get('추천 후속 질문', ''))
+            
             items.append(item)
             print(f"✓ 변환 완료: {item['id']} - {item['title'][:30]}...")
         
@@ -121,6 +130,109 @@ class ChatbotDataConverter:
                 print(f"✓ 동의어 등록: {main_word} → {len(synonym_list)}개")
         
         return synonyms
+    
+    def convert_faq_data(self, df: pd.DataFrame) -> Dict:
+        """FAQ 시트를 JSON으로 변환"""
+        faq_data = {
+            "metadata": {
+                "version": "1.0.0",
+                "updated_at": datetime.now().strftime("%Y-%m-%d"),
+                "description": "바로빌 자주묻는질문 (FAQ)",
+                "generated_by": "Excel to JSON Converter"
+            },
+            "categories": [],
+            "items": []
+        }
+        
+        categories_set = set()
+        items = []
+        
+        for idx, row in df.iterrows():
+            # 빈 행 스킵
+            if pd.isna(row.get('ID')) or pd.isna(row.get('질문')):
+                continue
+            
+            item = {
+                "id": str(row['ID']).strip(),
+                "question": str(row['질문']).strip(),
+                "category": str(row.get('카테고리', '')).strip() if pd.notna(row.get('카테고리')) else '기타'
+            }
+            
+            # 카테고리 수집
+            if item["category"]:
+                categories_set.add(item["category"])
+            
+            # 표시순서 (선택)
+            if pd.notna(row.get('표시순서')):
+                try:
+                    item["order"] = int(row['표시순서'])
+                except (ValueError, TypeError):
+                    item["order"] = idx + 1
+            else:
+                item["order"] = idx + 1
+            
+            # 답변 처리 (content 배열 또는 answer 필드)
+            answer_text = None
+            if pd.notna(row.get('답변')):
+                answer_text = str(row['답변']).strip()
+            
+            # 컨텐츠 필드가 있으면 content 배열로 변환 시도
+            if pd.notna(row.get('컨텐츠')) and str(row.get('컨텐츠')).strip() != '-':
+                # 컨텐츠 필드에 이미지 파일명이나 구조화된 정보가 있을 수 있음
+                # 간단한 텍스트인 경우 content 배열로 변환
+                content_text = str(row['컨텐츠']).strip()
+                if answer_text:
+                    # answer와 content를 결합
+                    item["content"] = [
+                        {
+                            "type": "text",
+                            "content": answer_text
+                        }
+                    ]
+                    # 컨텐츠에 이미지 정보가 포함되어 있으면 파싱 시도
+                    # 예: "이미지: tax-issuance-step1.png" 형식
+                    if '이미지:' in content_text or '.png' in content_text or '.jpg' in content_text:
+                        # 이미지 정보 추출 (간단한 파싱)
+                        lines = content_text.split('\n')
+                        for line in lines:
+                            line = line.strip()
+                            if line.startswith('이미지:') or line.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
+                                img_path = line.replace('이미지:', '').strip()
+                                if not img_path.startswith('/'):
+                                    img_path = f"/faq-images/{img_path}"
+                                item["content"].append({
+                                    "type": "image",
+                                    "src": img_path,
+                                    "alt": f"FAQ 이미지 {len(item['content'])}",
+                                    "caption": ""
+                                })
+                else:
+                    # answer가 없고 content만 있는 경우
+                    item["content"] = [
+                        {
+                            "type": "text",
+                            "content": content_text
+                        }
+                    ]
+            elif answer_text:
+                # answer만 있는 경우 (하위 호환성)
+                item["answer"] = answer_text
+            
+            # 관련 가이드 (선택)
+            if pd.notna(row.get('관련가이드URL')) and str(row.get('관련가이드URL')).strip() != '-':
+                item["relatedGuides"] = self._parse_guides(row.get('관련가이드URL', ''))
+            
+            # 챗봇 지식베이스 연결 (선택)
+            if pd.notna(row.get('챗봇 지식베이스 연결')) and str(row.get('챗봇 지식베이스 연결')).strip() != '-':
+                item["relatedKnowledgeId"] = str(row.get('챗봇 지식베이스 연결')).strip()
+            
+            items.append(item)
+            print(f"✓ FAQ 변환 완료: {item['id']} - {item['question'][:30]}...")
+        
+        faq_data["categories"] = sorted(list(categories_set))
+        faq_data["items"] = items
+        
+        return faq_data
     
     def _map_type(self, category: str) -> str:
         """구분을 JSON type으로 매핑"""
@@ -250,15 +362,25 @@ class ChatbotDataConverter:
             self.data['items'] = self.convert_main_data(list(sheets.values())[0])
         
         # 3. 동의어 변환
-        print("\n[3/4] 동의어 사전 변환 중...")
+        print("\n[3/5] 동의어 사전 변환 중...")
         synonym_sheet_names = [name for name in sheets.keys() if '동의어' in name]
         if synonym_sheet_names:
             self.data['synonyms'] = self.convert_synonyms(sheets[synonym_sheet_names[0]])
         else:
             print("⚠️  동의어 시트를 찾을 수 없습니다. 건너뜁니다.")
         
-        # 4. 메타데이터 생성
-        print("\n[4/4] 메타데이터 생성 중...")
+        # 4. FAQ 변환
+        print("\n[4/5] FAQ 데이터 변환 중...")
+        faq_sheet_names = [name for name in sheets.keys() if 'FAQ' in name.upper() or 'faq' in name.lower() or '자주묻는질문' in name]
+        if faq_sheet_names:
+            self.faq_data = self.convert_faq_data(sheets[faq_sheet_names[0]])
+            print(f"✓ FAQ 항목 {len(self.faq_data['items'])}개 변환 완료")
+            print(f"✓ FAQ 카테고리 {len(self.faq_data['categories'])}개: {', '.join(self.faq_data['categories'])}")
+        else:
+            print("⚠️  FAQ 시트를 찾을 수 없습니다. 건너뜁니다.")
+        
+        # 5. 메타데이터 생성
+        print("\n[5/5] 메타데이터 생성 중...")
         self.data['metadata'] = self.generate_metadata(len(self.data['items']))
         
         print("\n" + "=" * 60)
@@ -266,15 +388,34 @@ class ChatbotDataConverter:
         print("=" * 60)
         print(f"  - 총 항목 수: {len(self.data['items'])}개")
         print(f"  - 동의어 수: {len(self.data['synonyms'])}개")
+        if self.faq_data:
+            print(f"  - FAQ 항목 수: {len(self.faq_data['items'])}개")
         
         return self.data
     
-    def save_json(self, output_file: str):
+    def save_json(self, output_file: str, faq_output_file: str = None):
         """JSON 파일로 저장"""
         try:
+            # 메인 지식베이스 JSON 저장
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(self.data, f, ensure_ascii=False, indent=2)
             print(f"\n💾 JSON 파일 저장: {output_file}")
+            
+            # FAQ JSON 저장 (있는 경우)
+            if self.faq_data:
+                if faq_output_file:
+                    faq_file = faq_output_file
+                else:
+                    # output_file 경로에서 FAQ 파일명 생성
+                    import os
+                    base_dir = os.path.dirname(output_file)
+                    base_name = os.path.basename(output_file)
+                    name_without_ext = os.path.splitext(base_name)[0]
+                    faq_file = os.path.join(base_dir, f"{name_without_ext}-faq.json")
+                
+                with open(faq_file, 'w', encoding='utf-8') as f:
+                    json.dump(self.faq_data, f, ensure_ascii=False, indent=2)
+                print(f"💾 FAQ JSON 파일 저장: {faq_file}")
         except Exception as e:
             print(f"❌ JSON 저장 실패: {e}")
             sys.exit(1)
@@ -292,7 +433,8 @@ def main():
     )
     
     parser.add_argument('-i', '--input', required=True, help='입력 엑셀 파일 경로')
-    parser.add_argument('-o', '--output', required=True, help='출력 JSON 파일 경로')
+    parser.add_argument('-o', '--output', required=True, help='출력 JSON 파일 경로 (지식베이스)')
+    parser.add_argument('--faq-output', help='FAQ JSON 출력 파일 경로 (선택, 미지정 시 자동 생성)')
     parser.add_argument('-v', '--validate', action='store_true', help='변환 후 데이터 검증')
     parser.add_argument('--pretty', action='store_true', help='JSON 파일을 읽기 쉽게 포맷팅')
     
@@ -312,13 +454,24 @@ def main():
             sys.exit(1)
     
     # JSON 저장
-    converter.save_json(args.output)
+    converter.save_json(args.output, args.faq_output)
     
     print("\n🎉 작업이 성공적으로 완료되었습니다!")
     print(f"\n다음 단계:")
     print(f"  1. {args.output} 파일을 확인하세요")
-    print(f"  2. 프로젝트의 src/data/ 폴더에 복사하세요")
-    print(f"  3. 개발 서버를 재시작하세요: npm run dev")
+    if converter.faq_data:
+        import os
+        if args.faq_output:
+            faq_file = args.faq_output
+        else:
+            base_name = os.path.splitext(os.path.basename(args.output))[0]
+            faq_file = os.path.join(os.path.dirname(args.output), f"{base_name}-faq.json")
+        print(f"  2. {faq_file} 파일을 확인하세요")
+        print(f"  3. 프로젝트의 src/data/ 폴더에 두 파일을 복사하세요")
+        print(f"  4. 개발 서버를 재시작하세요: npm run dev")
+    else:
+        print(f"  2. 프로젝트의 src/data/ 폴더에 복사하세요")
+        print(f"  3. 개발 서버를 재시작하세요: npm run dev")
 
 
 if __name__ == '__main__':

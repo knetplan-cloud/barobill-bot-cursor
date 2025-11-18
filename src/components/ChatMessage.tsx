@@ -33,7 +33,7 @@ export const ChatMessage = ({
         <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-xl", isUser ? "bg-muted" : "bg-gradient-to-br from-primary to-primary-dark shadow-md")}>
           {isUser ? "👤" : "🤖"}
         </div>
-        {!isUser && <span className="text-[10px] font-semibold text-primary whitespace-nowrap">
+        {!isUser && <span className="text-xs font-semibold text-primary whitespace-nowrap">
             빌리 AI
           </span>}
       </div>

@@ -39,13 +39,43 @@ export const ChatInterface = ({
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const prevMessagesLengthRef = useRef(0);
+  
+  // 메시지가 추가될 때만 스크롤 (탭 전환 시에는 스크롤하지 않음)
   useEffect(() => {
-    if (scrollRef.current) {
+    const currentMessagesLength = messages.length;
+    const prevMessagesLength = prevMessagesLengthRef.current;
+    
+    // 메시지가 실제로 추가된 경우에만 스크롤
+    if (scrollRef.current && currentMessagesLength > prevMessagesLength && currentMessagesLength > 1) {
       scrollRef.current.scrollIntoView({
         behavior: "smooth"
       });
     }
-  }, [messages, isTyping]);
+    
+    prevMessagesLengthRef.current = currentMessagesLength;
+  }, [messages.length, isTyping]);
+  
+  // 컴포넌트 마운트 및 탭 전환 시 스크롤 상단 유지
+  useEffect(() => {
+    const resetScroll = () => {
+      if (scrollAreaRef.current) {
+        const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollContainer) {
+          scrollContainer.scrollTop = 0;
+        }
+      }
+    };
+    
+    // 초기 마운트 시
+    resetScroll();
+    
+    // 약간의 지연 후 다시 확인 (DOM 업데이트 대기)
+    const timeout = setTimeout(resetScroll, 100);
+    
+    return () => clearTimeout(timeout);
+  }, []);
   const handleSendMessage = async (userMessage: string) => {
     if (!userMessage.trim()) return;
     const userMsg: Message = {
@@ -138,14 +168,14 @@ export const ChatInterface = ({
           🤖
         </div>
         <div>
-          <h3 className="font-bold">바로빌  AI 빌리</h3>
-          <p className="text-xs opacity-90">세금계산서 발급 전문 상담</p>
+          <h3 className="font-bold text-base">바로빌  AI 빌리</h3>
+          <p className="text-sm opacity-90">세금계산서 발급 전문 상담</p>
         </div>
         <Sparkles className="ml-auto w-5 h-5" />
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
         {messages.map(message => <ChatMessage key={message.id} role={message.role} content={message.content} timestamp={message.timestamp} relatedGuides={message.relatedGuides} followUpQuestions={message.followUpQuestions} relatedQuestions={message.relatedQuestions} onQuestionClick={handleQuickQuestion} />)}
         {isTyping && <ChatMessage role="assistant" content="" timestamp={new Date()} isTyping />}
         <div ref={scrollRef} />
@@ -155,7 +185,7 @@ export const ChatInterface = ({
       <div className="p-4 border-t border-border space-y-3">
         {/* Quick Questions - Always visible */}
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
+          <p className="text-sm text-muted-foreground flex items-center gap-1 font-medium">
             ⚡ 빠른 질문
           </p>
           <div className="flex flex-wrap gap-2">

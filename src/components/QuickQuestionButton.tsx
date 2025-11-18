@@ -11,7 +11,7 @@ export const QuickQuestionButton = ({ question, onClick }: QuickQuestionButtonPr
       variant="outline"
       size="sm"
       onClick={() => onClick(question)}
-      className="text-xs bg-card hover:bg-primary hover:text-primary-foreground border-border transition-all duration-200"
+      className="text-sm bg-card hover:bg-primary hover:text-primary-foreground border-border transition-all duration-200"
     >
       {question}
     </Button>

@@ -1,5 +1,11 @@
 import unifiedData from "@/data/barobill-knowledge.json";
-import { extractDateFromQuery, replaceDynamicVariables, type ExtractedDate } from "./date-utils";
+import { 
+  extractDateFromQuery, 
+  replaceDynamicVariables, 
+  parseAmendmentReason,
+  type ExtractedDate,
+  type AmendmentReason
+} from "./date-utils";
 
 // 사용자가 설정 가능한 어투 타입
 export type ToneType = "formal" | "casual" | "plain";
@@ -61,6 +67,9 @@ const getExpandedKeywords = (query: string): string[] => {
 export const matchQuery = (query: string, tone: ToneType): MatchResult => {
   // 날짜 추출 (동적 변수 치환을 위해)
   const extractedDate = extractDateFromQuery(query);
+  
+  // 수정사유 파싱 (수정세금계산서인 경우)
+  const amendmentReason = parseAmendmentReason(query);
   
   // 날짜가 추출되면 키워드에 추가
   const dateKeywords: string[] = [];
@@ -152,8 +161,8 @@ export const matchQuery = (query: string, tone: ToneType): MatchResult => {
   // (5) 어투에 맞는 답변 반환 (없으면 formal을 기본값으로)
   let responseText = bestMatch.responses[tone] || bestMatch.responses["formal"];
   
-  // 동적 변수 치환 ({date}, {deadline}, {today})
-  responseText = replaceDynamicVariables(responseText, extractedDate);
+  // 동적 변수 치환 ({date}, {deadline}, {today}, {issueDeadline}, {vatDeadline}, {amendmentDeadline}, {penaltyInfo})
+  responseText = replaceDynamicVariables(responseText, extractedDate, amendmentReason);
 
   return {
     found: true,
